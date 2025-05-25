@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+torch
+transformers
+bitsandbytes
+accelerate
+pydantic
+mistralai
+pillow
+numpy
+python-multipart
+hashlib # Built-in
+passlib[bcrypt] # For password hashing (alternative/complement to hashlib)
+python-jose[cryptography] # For JWT tokens
+

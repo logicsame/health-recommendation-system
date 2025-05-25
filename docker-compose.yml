@@ -1,0 +1,58 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: smart-food-advisor-backend
+    # Load environment variables from .env file in the root directory
+    env_file:
+      - .env
+    # Optional: Mount local code for development (uncomment if needed)
+    # volumes:
+    #   - ./backend/app:/app/app
+    #   - ./backend/saved_model:/app/saved_model # Ensure model is present locally
+    ports:
+      - "8000:8000"
+    # Add healthcheck (optional but recommended)
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s # Give time for model loading
+    # Add restart policy
+    restart: unless-stopped
+    # Add resource limits (optional, adjust based on needs and LLM size)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2.0'
+    #       memory: 8G # Adjust based on LLM requirements
+    #     reservations:
+    #       memory: 4G
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: smart-food-advisor-frontend
+    ports:
+      - "8501:8501"
+    # Pass the backend URL to the frontend container
+    environment:
+      - BACKEND_API_URL=http://backend:8000/api/v1
+      # Pass Streamlit specific env vars if needed
+      # - STREAMLIT_SERVER_MAX_UPLOAD_SIZE=200
+    depends_on:
+      backend: # Wait for backend to be healthy (if healthcheck is defined)
+        condition: service_healthy
+      # If no healthcheck, use: condition: service_started
+    restart: unless-stopped
+
+# Optional: Define volumes if needed for persistent data (e.g., database)
+# volumes:
+#   postgres_data:
+
